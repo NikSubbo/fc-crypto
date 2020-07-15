@@ -9,6 +9,7 @@ import {
   TableRow,
   TableSortLabel,
   Paper,
+  Typography,
 } from '@material-ui/core';
 
 const descendingComparator = (a, b, orderBy) => {
@@ -42,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     width: '100%',
     marginBottom: theme.spacing(2),
-    marginTop: theme.spacing(4),
   },
   table: {
     minWidth: 750,
@@ -57,6 +57,10 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     top: 20,
     width: 1,
+  },
+  title: {
+    marginTop: theme.spacing(4),
+    marginBottom: theme.spacing(2),
   },
   tableHead: {
     backgroundColor: '#9e9e9e',
@@ -105,10 +109,18 @@ const CryptoTable = (props) => {
 
   return (
     <div className={classes.root}>
+      {exchanges ? <Typography variant="h6" className={classes.title}>Exchanges</Typography> : (
+        <Typography variant="h6" className={classes.title}>
+          Markets of
+          {' '}
+          {markets[0].exchangeId}
+          {' '}
+          exchange
+        </Typography>
+      )}
       <Paper className={classes.paper}>
         <TableContainer>
           <Table className={classes.table}>
-
             <TableHead>
               <TableRow className={classes.tableHead}>
                 {headCells.map((headCell) => (
@@ -134,9 +146,8 @@ const CryptoTable = (props) => {
                 ))}
               </TableRow>
             </TableHead>
-
             <TableBody>
-              {!markets ? stableSort(exchanges, getComparator(order, orderBy))
+              {exchanges ? stableSort(exchanges, getComparator(order, orderBy))
                 .map((exchange) => (
                   <TableRow
                     hover
