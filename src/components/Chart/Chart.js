@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Chart(props) {
+const Chart = (props) => {
   const [candles, setCandles] = useState();
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,49 +46,47 @@ function Chart(props) {
     },
   };
 
-  const fetchData = async () => {
-    setError(false);
-    setLoading(true);
-    try {
-      const response = await fetch(`https://api.coincap.io/v2/candles?exchange=${exchangeId}&interval=${interval}&baseId=${baseId}&quoteId=${quoteId}`);
-      if (!response.ok) throw Error();
-      const { data } = await response.json();
-      const arr = [];
-      // eslint-disable-next-line no-plusplus
-      for (let i = 0; i < data.length; i++) {
-        arr.push({
-          x: new Date(data[i].period),
-          y: [Math.round(data[i].open * 100000000) / 100000000,
-            Math.round(data[i].high * 100000000) / 100000000,
-            Math.round(data[i].low * 100000000) / 100000000,
-            Math.round(data[i].close * 100000000) / 100000000],
-        });
-      }
-      const result = {
-        series: [{
-          data: arr,
-        }],
-      };
-      setCandles(result);
-    } catch (err) {
-      setError(true);
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      setError(false);
+      setLoading(true);
+      try {
+        const response = await fetch(`https://api.coincap.io/v2/candles?exchange=${exchangeId}&interval=${interval}&baseId=${baseId}&quoteId=${quoteId}`);
+        if (!response.ok) throw Error();
+        const { data } = await response.json();
+        const chartData = data.map((item) => ({
+          x: new Date(item.period),
+          y: [
+            Math.round(item.open * 100000000) / 100000000,
+            Math.round(item.high * 100000000) / 100000000,
+            Math.round(item.low * 100000000) / 100000000,
+            Math.round(item.close * 100000000) / 100000000,
+          ],
+        }));
+        const result = {
+          series: [{
+            data: chartData,
+          }],
+        };
+        setCandles(result);
+      } catch (err) {
+        setError(true);
+      }
+      setLoading(false);
+    };
+
     fetchData();
-  }, []);
+  }, [exchangeId, interval, baseId, quoteId]);
 
   return (
     <Container>
-      {error && <div> Sorry, request was failed </div>}
-      {loading && <div> Loading... </div>}
-      {!candles ? null : (
+      {error && <Box> Sorry, request was failed. </Box>}
+      {loading && <Box> Loading... </Box>}
+      {candles && candles.series[0].data.length > 0 && (
         <>
           <ApexChart className={classes.chart} options={options} series={candles.series} type="candlestick" height={350} />
           <Box className={classes.btn}>
-            <Link className={classes.btnLink} to="/markets/binance">
+            <Link className={classes.btnLink} to={`/markets/${exchangeId}`}>
               <Button variant="outlined" color="primary">
                 Back to markets
               </Button>
@@ -96,8 +94,21 @@ function Chart(props) {
           </Box>
         </>
       )}
+      {candles && candles.series[0].data.length === 0 && (
+        <Box>
+          Exchange
+          {' '}
+          {exchangeId}
+          : chart for
+          {baseId}
+          /
+          {quoteId}
+          {' '}
+          pair is unavailable.
+        </Box>
+      )}
     </Container>
   );
-}
+};
 
 export default Chart;

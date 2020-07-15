@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container } from '@material-ui/core';
+import { Container, Box } from '@material-ui/core';
 import Table from '../Table/Table';
 
 const Exhanges = (props) => {
@@ -14,7 +14,13 @@ const Exhanges = (props) => {
     try {
       const response = await fetch('https://api.coincap.io/v2/exchanges');
       if (!response.ok) throw Error();
-      const { data } = await response.json();
+      const data = (await response.json()).data.map((exchange) => ({
+        ...exchange,
+        percentTotalVolume: Number(exchange.percentTotalVolume),
+        rank: Number(exchange.rank),
+        tradingPairs: Number(exchange.tradingPairs),
+        volumeUsd: Number(exchange.volumeUsd),
+      }));
       setExhanges(data);
     } catch (err) {
       setError(true);
@@ -28,9 +34,9 @@ const Exhanges = (props) => {
 
   return (
     <Container>
-      {error && <div> Sorry, request was failed </div>}
-      {loading && <div> Loading... </div>}
-      {!exchanges ? null : <Table exchanges={exchanges} history={history} />}
+      {error && <Box> Sorry, request was failed. </Box>}
+      {loading && <Box> Loading... </Box>}
+      {exchanges && <Table exchanges={exchanges} history={history} />}
     </Container>
   );
 };

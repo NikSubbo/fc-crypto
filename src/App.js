@@ -5,17 +5,15 @@ import Markets from './components/Markets/Markets';
 import Chart from './components/Chart/Chart';
 import Navbar from './components/Navbar/Navbar';
 
-function App() {
-  return (
-    <>
-      <Navbar />
-      <Switch>
-        <Route exact path="/" component={Exchanges} />
-        <Route exact path="/markets/:exchangeId" component={Markets} />
-        <Route exact path="/markets/:exchangeId/:interval/:baseId/:quoteId" component={Chart} />
-      </Switch>
-    </>
-  );
-}
+const App = () => (
+  <>
+    <Navbar />
+    <Switch>
+      <Route path="/markets/:exchangeId/:interval/:baseId/:quoteId" component={Chart} />
+      <Route path="/markets/:exchangeId" component={Markets} />
+      <Route path="/" component={Exchanges} />
+    </Switch>
+  </>
+);
 
 export default App;
